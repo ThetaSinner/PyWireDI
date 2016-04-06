@@ -34,11 +34,11 @@ class CaseTransform:
         return result
 
     @staticmethod
-    def underscore_to_pascal_case(pascal_case):
+    def underscore_to_pascal_case(underscore_case):
         result = ""
         last_was_underscore = True
-        for letter in pascal_case:
-            if last_was_underscore and letter != '_':
+        for letter in underscore_case:
+            if last_was_underscore:
                 result += letter.upper()
                 last_was_underscore = False
             else:
@@ -46,8 +46,5 @@ class CaseTransform:
                     last_was_underscore = True
                 else:
                     result += letter
-
-        if len(result) is not 0 and result[0].islower():
-            result = result[0].upper() + result[1:]
 
         return result

@@ -47,3 +47,4 @@ Temporary Items
 .apdisk
 
 *.pyc
+tests/.cache/v/cache/lastfailed

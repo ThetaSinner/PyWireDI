@@ -31,6 +31,7 @@ class Component:
         scanner = ClassScanner(self.clazz)
         self.methods_marked_inject.extend(scanner.methods_with_decorator("inject"))
 
+        # This will need to change if lazy loading is going to be supported at some point.
         if self.scope is Scope.Singleton:
             self.constructed_type = clazz()
 
@@ -47,7 +48,7 @@ class Component:
         return self.methods_marked_inject
 
     def get_instance(self):
-        if self.scope is Scope.Singleton:
+        if self.scope == Scope.Singleton:
             return self.constructed_type
-        elif self.scope is Scope.Prototype:
+        elif self.scope == Scope.Prototype:
             return self.clazz()

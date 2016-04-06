@@ -51,12 +51,15 @@ class AutoWire:
     def wire(self):
         for type_manager_key in self.type_manager_list:
             type_manager = self.type_manager_list[type_manager_key]
-            if type_manager.get_scope() is Scope.Singleton:
-                self.auto_wire_managed_type(type_manager)
+            if type_manager.get_scope() == Scope.Singleton:
+                self._auto_wire_managed_type(type_manager)
 
-        self._post_construct()
+        for type_manager_key in self.type_manager_list:
+            type_manager = self.type_manager_list[type_manager_key]
+            if type_manager.get_scope() == Scope.Singleton:
+                self._post_construct(type_manager)
 
-    def auto_wire_managed_type(self, managed_type):
+    def _auto_wire_managed_type(self, managed_type):
         built_clazz = managed_type.get_instance()
 
         for dependency_setter_method_names in managed_type.get_dependencies():
@@ -72,15 +75,18 @@ class AutoWire:
 
     def get(self, clazz_name):
         managed_type = self.type_manager_list[clazz_name]
-        if managed_type.get_scope() is Scope.Singleton:
+        if managed_type.get_scope() == Scope.Singleton:
             return managed_type.get_instance()
-        elif managed_type.get_scope() is Scope.Prototype:
-            return self.auto_wire_managed_type(managed_type)
+        elif managed_type.get_scope() == Scope.Prototype:
+            inst = self._auto_wire_managed_type(managed_type)
+            AutoWire._post_construct(managed_type, instance=inst)
+            return inst
 
-    def _post_construct(self):
-        for type_manager_key in self.type_manager_list:
-            type_manager = self.type_manager_list[type_manager_key]
-            if type_manager.get_scope() is Scope.Singleton:
-                post_construct_methods = ClassScanner(type_manager.get_clazz()).methods_with_decorator("post_construct")
-                if len(post_construct_methods) > 0:
-                    getattr(type_manager.get_instance(), post_construct_methods[0])()
+    @staticmethod
+    def _post_construct(type_manager, instance=None):
+        post_construct_methods = ClassScanner(type_manager.get_clazz()).methods_with_decorator("post_construct")
+        if len(post_construct_methods) > 0:
+            if instance is None:
+                instance = type_manager.get_instance()
+
+            getattr(instance, post_construct_methods[0])()

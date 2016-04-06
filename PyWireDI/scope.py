@@ -23,3 +23,6 @@ from enum import Enum
 class Scope(Enum):
     Singleton = 0
     Prototype = 1
+
+    def __eq__(self, other):
+        return self.value == other.value
